@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, ValidationError, EmailStr, validator
+from pydantic import BaseModel, ValidationError, EmailStr, validator, field_validator
 import re
 
 from sqlalchemy import String, Column, Integer, Identity, select
@@ -19,15 +19,15 @@ class User(BaseModel):
     name: str
     email: str
     #Se añade validación de All fields required [400]
-    @validator("name", "email")
+    @field_validator("name", "email")
     def validate_not_empty(cls, value):
         if value == "":
             raise HTTPException(status_code=400, detail="All fields are required")
         return value
-    @validator("email")
+    @field_validator("email")
     def valid_email(cls, value):
         if not email_regex.match(value):
-            raise HTTPException(status_code=400, detail="El email no es válido")
+            raise HTTPException(status_code=400, detail="The email is not valid")
         return value
 
 
@@ -79,7 +79,7 @@ def set_user(data: User):
         usuario= Users(name=data.name, email=data.email)
         session.add(usuario)
         session.commit()
-        return {"Message":"User was created succesfully"}
+        return {"Message":"User was created successfully"}
     
 #Endpoint update user
 @app.put("/user/{id}")
